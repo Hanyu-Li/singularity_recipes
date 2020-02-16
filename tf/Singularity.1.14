@@ -36,22 +36,32 @@ singularity exec --nv THIS_CONTAINER.simg bash
     yum install -y python-devel python-pip python-setuptools
     yum install -y hdf5
 
+    yum update -y
+    yum groupinstall -y "Development Tools"
+    yum install -y epel-release
+    yum install -y wget emacs vim 
+    yum install -y emacs vim openssh-clients zip 
+    yum install -y python-devel python-pip  python-setuptools centos-release-scl
+    yum install -y hdf5  rh-python36 python36-setuptools
+    scl enable rh-python36 bash
+    yum install -y easy_install-3.6 python36-pip
+
     # pip basics
-    pip --no-cache-dir --disable-pip-version-check install --upgrade setuptools
-    pip --no-cache-dir --disable-pip-version-check install future
-    pip --no-cache-dir --disable-pip-version-check install 'matplotlib<3.0' # for python2.7
-    pip --no-cache-dir --disable-pip-version-check install 'ipython<6.0'    # for python2.7
-    pip --no-cache-dir --disable-pip-version-check install 'ipykernel<5.0'  # for python2.7
-    pip --no-cache-dir --disable-pip-version-check install numpy wheel zmq six pygments pyyaml cython gputil psutil humanize h5py tqdm scipy seaborn tables
-    pip --no-cache-dir --disable-pip-version-check install  pandas scikit-image scikit-learn Pillow opencv-python
-    pip --no-cache-dir --disable-pip-version-check install jupyter notebook
+    pip3 --no-cache-dir --disable-pip-version-check install --upgrade setuptools
+    pip3 --no-cache-dir --disable-pip-version-check install future
+    pip3 --no-cache-dir --disable-pip-version-check install 'matplotlib' # for python2.7
+    pip3 --no-cache-dir --disable-pip-version-check install 'ipython'    # for python2.7
+    pip3 --no-cache-dir --disable-pip-version-check install 'ipykernel'  # for python2.7
+    pip3 --no-cache-dir --disable-pip-version-check install numpy wheel zmq six pygments pyyaml cython gputil psutil humanize h5py tqdm scipy seaborn tables
+    pip3 --no-cache-dir --disable-pip-version-check install  pandas scikit-image scikit-learn Pillow opencv-python
+    pip3 --no-cache-dir --disable-pip-version-check install jupyter notebook
 
     # tensorflow
-    pip --no-cache-dir --disable-pip-version-check install --upgrade tensorflow-gpu==1.14.0
-    pip --no-cache-dir --disable-pip-version-check install tensorboard
+    pip3 --no-cache-dir --disable-pip-version-check install --upgrade tensorflow-gpu==1.14.0
+    pip3 --no-cache-dir --disable-pip-version-check install tensorboard
     
     # keras
-    pip --no-cache-dir --disable-pip-version-check install keras
+    pip3 --no-cache-dir --disable-pip-version-check install keras
 
     # install MPICH
     wget -q http://www.mpich.org/static/downloads/3.2.1/mpich-3.2.1.tar.gz
@@ -78,5 +88,15 @@ singularity exec --nv THIS_CONTAINER.simg bash
     rpm -i build/pkg/rpm/x86_64/libnccl* 
     cd -
 
-    pip --no-cache-dir --disable-pip-version-check install mpi4py
+    pip3 --no-cache-dir --disable-pip-version-check install mpi4py
 
+    # customized
+    mkdir /container
+    cd /container
+    git clone https://github.com/Hanyu-Li/ffn
+    cd ffn
+    pip3 --no-cache-dir --disable-pip-version-check install -r requirements.txt
+    pip3 --no-cache-dir --disable-pip-version-check install -e .
+
+    
+    
