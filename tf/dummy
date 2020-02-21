@@ -1,0 +1,55 @@
+Bootstrap: docker
+From: nvidia/cuda:10.0-cudnn7-devel-centos7
+
+%help
+Centos7 with cuda10.0 cudnn7
+
+To start your container simply try
+singularity exec THIS_CONTAINER.simg bash
+
+To use GPUs, try
+singularity exec --nv THIS_CONTAINER.simg bash
+
+
+%environment
+
+    # for system
+    export CUDA_DEVICE_ORDER=PCI_BUS_ID
+
+    # Add cupti to the path for profiling:
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/extras/CUPTI/lib64
+
+    source scl_source enable devtoolset-4
+    export PATH=/usr/local/mpich/install/bin/:${PATH}
+    export LD_LIBRARY_PATH=/usr/local/mpich/install/lib/:${LD_LIBRARY_PATH}
+
+%post
+
+    # yum basics
+    yum update -y
+    yum groupinstall -y "Development Tools"
+    yum install -y epel-release
+    yum install -y centos-release-scl
+    yum install -y devtoolset-4
+    yum install -y wget emacs vim
+    yum install -y emacs vim openssh-clients zip
+    yum install -y hdf5 rh-python36 python36-setuptools python36-devel
+    scl enable rh-python36 bash
+    yum install -y easy_install-3.6 python36-pip
+
+    # pip basics
+    pip3 --no-cache-dir --disable-pip-version-check install --upgrade setuptools
+    pip3 --no-cache-dir --disable-pip-version-check install future
+    # customized
+    pip3 --no-cache-dir --disable-pip-version-check install cloud-volume
+    mkdir /container
+    cd /container
+    git clone https://github.com/Hanyu-Li/ffn
+    cd ffn
+    pip3 --no-cache-dir --disable-pip-version-check install -r requirements.txt
+    pip3 --no-cache-dir --disable-pip-version-check install -e .
+
+
+
+    
+    

@@ -19,7 +19,7 @@ singularity exec --nv THIS_CONTAINER.simg bash
     # Add cupti to the path for profiling:
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/extras/CUPTI/lib64
 
-    source scl_source enable devtoolset-4
+    #source scl_source enable devtoolset-4
     export PATH=/usr/local/mpich/install/bin/:${PATH}
     export LD_LIBRARY_PATH=/usr/local/mpich/install/lib/:${LD_LIBRARY_PATH}
 
@@ -30,38 +30,33 @@ singularity exec --nv THIS_CONTAINER.simg bash
     yum groupinstall -y "Development Tools"
     yum install -y epel-release
     yum install -y centos-release-scl
-    yum install -y devtoolset-4
+    yum install -y devtoolset-7
     yum install -y wget emacs vim
     yum install -y emacs vim openssh-clients zip
-    yum install -y python-devel python-pip python-setuptools
-    yum install -y hdf5
-
-    yum update -y
-    yum groupinstall -y "Development Tools"
-    yum install -y epel-release
-    yum install -y wget emacs vim 
-    yum install -y emacs vim openssh-clients zip 
-    yum install -y python-devel python-pip  python-setuptools centos-release-scl
-    yum install -y hdf5  rh-python36 python36-setuptools
-    scl enable rh-python36 bash
+    yum install -y hdf5 rh-python36 python36-setuptools python36-devel
+    scl enable rh-python36 devtoolset-7 bash
     yum install -y easy_install-3.6 python36-pip
 
+    #alias python=python3
+
     # pip basics
-    pip3 --no-cache-dir --disable-pip-version-check install --upgrade setuptools
-    pip3 --no-cache-dir --disable-pip-version-check install future
-    pip3 --no-cache-dir --disable-pip-version-check install 'matplotlib' # for python2.7
-    pip3 --no-cache-dir --disable-pip-version-check install 'ipython'    # for python2.7
-    pip3 --no-cache-dir --disable-pip-version-check install 'ipykernel'  # for python2.7
-    pip3 --no-cache-dir --disable-pip-version-check install numpy wheel zmq six pygments pyyaml cython gputil psutil humanize h5py tqdm scipy seaborn tables
-    pip3 --no-cache-dir --disable-pip-version-check install  pandas scikit-image scikit-learn Pillow opencv-python
-    pip3 --no-cache-dir --disable-pip-version-check install jupyter notebook
+    pip3 install -U pip
+    pip --no-cache-dir --disable-pip-version-check install --upgrade setuptools
+    pip --no-cache-dir --disable-pip-version-check install future
+    pip --no-cache-dir --disable-pip-version-check install 'matplotlib' 
+    pip --no-cache-dir --disable-pip-version-check install 'ipython'    
+    pip --no-cache-dir --disable-pip-version-check install 'ipykernel'  
+    pip --no-cache-dir --disable-pip-version-check install numpy wheel zmq six pygments pyyaml cython gputil psutil humanize h5py tqdm scipy seaborn tables
+    pip --no-cache-dir --disable-pip-version-check install  pandas scikit-image scikit-learn Pillow opencv-python
+    pip --no-cache-dir --disable-pip-version-check install jupyter notebook
 
     # tensorflow
-    pip3 --no-cache-dir --disable-pip-version-check install --upgrade tensorflow-gpu==1.14.0
-    pip3 --no-cache-dir --disable-pip-version-check install tensorboard
+    pip --no-cache-dir --disable-pip-version-check install --upgrade tensorflow-gpu==1.14.0
+    pip --no-cache-dir --disable-pip-version-check install tensorboard
     
     # keras
-    pip3 --no-cache-dir --disable-pip-version-check install keras
+    pip --no-cache-dir --disable-pip-version-check install keras
+
 
     # install MPICH
     wget -q http://www.mpich.org/static/downloads/3.2.1/mpich-3.2.1.tar.gz
@@ -81,22 +76,30 @@ singularity exec --nv THIS_CONTAINER.simg bash
     rm -rf mpich-3.2.1
 
     # nccl2
-    git clone https://github.com/NVIDIA/nccl.git
-    cd nccl;
-    make -j src.build
-    make pkg.redhat.build
-    rpm -i build/pkg/rpm/x86_64/libnccl* 
-    cd -
+    #git clone https://github.com/NVIDIA/nccl.git
+    #cd nccl;
+    #make -j src.build
+    #make pkg.redhat.build
+    #rpm -i build/pkg/rpm/x86_64/libnccl* 
+    #cd -
 
-    pip3 --no-cache-dir --disable-pip-version-check install mpi4py
+    pip --no-cache-dir --disable-pip-version-check install mpi4py
+    pip --no-cache-dir --disable-pip-version-check install horovod
+
 
     # customized
+    yum install -y ninja-build
+    pip --no-cache-dir --disable-pip-version-check install scikit-build
+    pip --no-cache-dir --disable-pip-version-check install DracoPy
+    pip --no-cache-dir --disable-pip-version-check install cloud-volume
     mkdir /container
     cd /container
     git clone https://github.com/Hanyu-Li/ffn
     cd ffn
-    pip3 --no-cache-dir --disable-pip-version-check install -r requirements.txt
-    pip3 --no-cache-dir --disable-pip-version-check install -e .
+    pip --no-cache-dir --disable-pip-version-check install -r requirements.txt
+    pip --no-cache-dir --disable-pip-version-check install -e .
+
+
 
     
     
