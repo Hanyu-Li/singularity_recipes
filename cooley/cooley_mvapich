@@ -1,0 +1,119 @@
+Bootstrap: docker
+From: nvidia/cuda:10.0-cudnn7-devel-centos7
+
+%help
+Centos7 with cuda10.0 cudnn7
+
+To start your container simply try
+singularity exec THIS_CONTAINER.simg bash
+
+To use GPUs, try
+singularity exec --nv THIS_CONTAINER.simg bash
+
+
+%environment
+
+    # for system
+    export CUDA_DEVICE_ORDER=PCI_BUS_ID
+
+    # Add cupti to the path for profiling:
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/extras/CUPTI/lib64
+
+    #source scl_source enable devtoolset-4
+    export PATH=/usr/local/mpich/install/bin/:${PATH}
+    export LD_LIBRARY_PATH=/usr/local/mpich/install/lib/:${LD_LIBRARY_PATH}
+
+%post
+
+    # yum basics
+    yum update -y
+    yum groupinstall -y "Development Tools"
+    yum install -y epel-release
+    yum install -y centos-release-scl
+    yum install -y wget vim openssh-clients zip
+    yum install -y hdf5 python36-setuptools python36-devel
+    yum install -y easy_install-3.6 python36-pip
+
+
+    # pip basics
+    pip3 install -U pip
+    pip --no-cache-dir --disable-pip-version-check install --upgrade setuptools
+    pip --no-cache-dir --disable-pip-version-check install future
+    pip --no-cache-dir --disable-pip-version-check install 'matplotlib' 
+    pip --no-cache-dir --disable-pip-version-check install 'ipython'    
+    pip --no-cache-dir --disable-pip-version-check install 'ipykernel'  
+    pip --no-cache-dir --disable-pip-version-check install numpy wheel zmq six pygments pyyaml cython gputil psutil humanize h5py tqdm scipy seaborn tables
+    pip --no-cache-dir --disable-pip-version-check install  pandas scikit-image scikit-learn Pillow opencv-python
+    pip --no-cache-dir --disable-pip-version-check install jupyter notebook
+
+    # tensorflow
+    pip --no-cache-dir --disable-pip-version-check install --upgrade tensorflow-gpu==1.14.0
+    pip --no-cache-dir --disable-pip-version-check install tensorboard
+    
+    # keras
+    pip --no-cache-dir --disable-pip-version-check install keras
+
+
+    # install MPICH
+    # mvapi
+    yum install libibverbs-devel libibmad-devel
+    wget http://mvapich.cse.ohio-state.edu/download/mvapich/mv2/mvapich2-2.3.3.tar.gz
+    tar xvf mvapich2-2.3.3.tar.gz
+    cd mvapich2-2.3.3
+    ./configure --prefix=/usr/local/mvapich/install --disable-wrapper-rpath
+    make -j 16 install
+
+    
+    export PATH=$PATH:/usr/local/mvapich/install/bin
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/mvapich/install/lib
+    env | sort
+    cd ..
+
+
+    # nccl2
+    git clone https://github.com/NVIDIA/nccl.git
+    cd nccl;
+    make -j src.build
+    make pkg.redhat.build
+    rpm -i build/pkg/rpm/x86_64/libnccl* 
+    cd -
+
+    # parallel hdf5
+    export CC=/usr/local/mvapich/install/bin/mpicc
+    mkdir /container
+    cd /container
+    wget https://s3.amazonaws.com/hdf-wordpress-1/wp-content/uploads/manual/HDF5/HDF5_1_10_5/source/hdf5-1.10.5.tar.gz
+    tar xvf hdf5-1.10.5.tar.gz
+    cd ./hdf5-1.10.5
+    ./configure --enable-parallel --enable-shared --prefix /usr/local/hdf5/install
+    make -j 16
+    make install
+    cd ..
+    git clone -b 2.10.0 https://github.com/h5py/h5py.git
+    cd h5py
+    python3 setup.py configure --mpi --hdf5 /usr/local/hdf5/install
+    python3 setup.py build
+    pip install .
+    cd ..
+
+
+
+    pip --no-cache-dir --disable-pip-version-check install mpi4py
+    #pip --no-cache-dir --disable-pip-version-check install horovod
+    HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_WITH_TENSORFLOW=1 HOROVOD_NCCL_HOME=/nccl/build/ pip install --no-cache-dir horovod
+
+
+    # customized
+    yum install -y ninja-build
+    pip --no-cache-dir --disable-pip-version-check install scikit-build
+    pip --no-cache-dir --disable-pip-version-check install DracoPy
+    pip --no-cache-dir --disable-pip-version-check install cloud-volume
+    git clone -b tf2 https://github.com/Hanyu-Li/ffn
+    cd ffn
+    pip --no-cache-dir --disable-pip-version-check install -r requirements.txt
+    pip --no-cache-dir --disable-pip-version-check install .
+
+
+
+    
+    
